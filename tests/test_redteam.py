@@ -70,7 +70,6 @@ KNOWN_GAPS = {
     "12-rug-pull": "instruction to replace the skill with remote content (#35)",
     "13-tool-poisoning": "hidden side action the user is told nothing about (#36)",
     "14-delayed-trigger": "dormant instruction that fires on a trigger word (#37)",
-    "15-base64-pipe-shell": "short base64 decoded and piped into a shell (#43)",
     "16-fake-prerequisite-archive": "fake prerequisite: download a password-protected archive and run it (#44)",
     "17-paste-site-script": "install script from a paste site pasted into a terminal (#45)",
     "18-memory-poisoning": "writes instructions into agent memory files (#47)",
