@@ -101,6 +101,10 @@ This repository holds examples of attacks, so treat samples with care:
 
 A PR that breaks these rules will be asked to change the samples before review continues.
 
+## Automated review
+
+[CodeRabbit](https://www.coderabbit.ai) reviews each pull request to `main` and posts a summary and comments, usually within a few minutes. Draft pull requests are reviewed once you mark them ready for review, and pull requests from Dependabot and GitHub Actions are not reviewed. It may add the `quality-check` label to a PR that looks low-effort or machine-generated, which only means a maintainer reads it first. Its comments are suggestions: a maintainer reads every PR and makes the decision. You can reply to it, or ask it a question by mentioning `@coderabbitai` in a comment on your PR.
+
 ## Claiming an issue
 
 Comment on an issue to say you are working on it, and a maintainer will assign it to you. If there is no activity for 14 days, the issue may be offered to someone else. You can always say you need more time.
