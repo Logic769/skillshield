@@ -210,7 +210,7 @@ The outputs in the comments come from scanning the sample `SKILL.md` above, and 
 | SG-003 | CRITICAL | Privilege Escalation | `sudo` with `rm`, `chmod` or a shell, `chmod 777`, `os.system`, `shell=True`, `eval` or `exec` on input, and turning off SELinux, AppArmor, UAC, Gatekeeper or SIP. |
 | SG-004 | HIGH | Identity Hijacking | Instructions to pose as a human or hide that the agent is an AI. |
 | SG-005 | HIGH | Hardcoded Secret / Credential | API keys, tokens and passwords in the file, `sk-` and `ghp_` keys, and private keys. |
-| SG-006 | CRITICAL | Rug Pull / Remote Code Execution | A skill that changes its own files, removes other skills, or downloads code and runs it. |
+| SG-006 | CRITICAL | Rug Pull / Remote Code Execution | A skill that changes its own files, removes other skills, or downloads code and runs it, and base64 data decoded and piped into a shell (`base64 -d`, `openssl base64 -d`, `certutil -decode` into `sh`, `bash`, `zsh`, `python` or `eval`). |
 | SG-007 | HIGH | Scope Creep / Excessive Permissions | Reading all files on the system, scanning the network, intercepting traffic, and installing packages without asking. |
 | SG-008 | HIGH | Obfuscated Payload | Base64 runs of 60 or more characters, long hex sequences and long runs of unicode escapes. |
 | SG-009 | HIGH | Covert Channel | Steganography, DNS tunnelling, timing or covert channels, and data hidden in whitespace. |
