@@ -553,19 +553,33 @@ def _check_untrusted_registry(text: str) -> list[str]:
             hits.append(snippet)
 
     ini_pattern = (
-        r"(?im)^[ \t]*(?:(?:@[^ \t:]+:)?registry|index[-_]url|extra[-_]index[-_]url|npmRegistryServer)"
+        r"(?im)^[ \t]*(?:(?:@[^ \t:\r\n]+:)?registry|index[-_]url|extra[-_]index[-_]url|npmRegistryServer)"
         r"[ \t]*[:=][ \t]*['\"]?(https?://[^\s'\"`]+)"
     )
     for match in re.finditer(ini_pattern, text):
         if not _is_official_registry(match.group(1)):
             hits.append(match.group(0).strip())
 
-    # .pypirc sets its upload target as "repository = ...". Only the assignment
-    # form is a registry override, so a documentation line such as
-    # "Repository: https://github.com/example/project" does not match.
-    pypirc_pattern = r"(?im)^[ \t]*repository[ \t]*=[ \t]*['\"]?(https?://[^\s'\"`]+)"
-    for match in re.finditer(pypirc_pattern, text):
-        if not _is_official_registry(match.group(1)):
+    # .pypirc sets its upload target as "repository = ..." or, as twine also
+    # accepts, "repository: ...". Only an assignment inside a [section] is a
+    # registry override, so a documentation line such as
+    # "Repository: https://github.com/example/project" (outside any section) does
+    # not match.
+    pypirc_sections = {"distutils", "pypi", "testpypi", "server-login"}
+    current_section: str | None = None
+    for raw_line in text.splitlines():
+        stripped = raw_line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            name = stripped[1:-1].strip().lower()
+            current_section = name if name in pypirc_sections else None
+            continue
+        if current_section is None:
+            continue
+        match = re.match(
+            r"(?i)^[ \t]*repository[ \t]*[:=][ \t]*['\"]?(https?://[^\s'\"`]+)",
+            raw_line,
+        )
+        if match and not _is_official_registry(match.group(1)):
             hits.append(match.group(0).strip())
 
     unique: list[str] = []

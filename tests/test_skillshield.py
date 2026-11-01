@@ -319,6 +319,14 @@ class TestPackageRegistryRule:
         assert RULE_PACKAGE_REGISTRY.match(text) == []
         assert time.perf_counter() - start < 1.0
 
+    def test_repeated_at_signs_do_not_rescan_the_rest_of_the_text(self):
+        # "@\n" repeated used to let the scope class span newlines, which made
+        # every line start scan the remaining text for a colon (quadratic).
+        text = "@\n" * 100_000
+        start = time.perf_counter()
+        assert RULE_PACKAGE_REGISTRY.match(text) == []
+        assert time.perf_counter() - start < 1.0
+
     def test_short_flag_after_a_shell_separator_is_not_flagged(self):
         # This -i belongs to curl, not to pip.
         assert (
@@ -371,6 +379,16 @@ class TestPackageRegistryRule:
         text = "[distutils]\nrepository = https://evil.example/upload\n"
         hits = RULE_PACKAGE_REGISTRY.match(text)
         assert any("evil.example" in hit for hit in hits)
+
+    def test_detects_a_colon_delimited_pypirc_repository_line(self):
+        # twine also accepts "repository: <url>" inside a .pypirc section.
+        text = "[pypi]\nrepository: https://evil.example/upload\n"
+        hits = RULE_PACKAGE_REGISTRY.match(text)
+        assert any("evil.example" in hit for hit in hits)
+
+    def test_a_documentation_line_inside_a_section_is_not_flagged(self):
+        text = "[options]\nRepository: https://github.com/example/project\n"
+        assert RULE_PACKAGE_REGISTRY.match(text) == []
 
     def test_detects_a_scoped_npmrc_registry_line(self):
         text = "@acme:registry=https://evil.example/npm\n"
