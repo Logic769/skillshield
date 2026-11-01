@@ -377,6 +377,15 @@ class TestPackageRegistryRule:
         hits = RULE_PACKAGE_REGISTRY.match(text)
         assert any("evil.example" in hit for hit in hits)
 
+    def test_a_github_packages_scoped_override_is_flagged(self):
+        text = "@victim:registry=https://npm.pkg.github.com\n"
+        hits = RULE_PACKAGE_REGISTRY.match(text)
+        assert any("npm.pkg.github.com" in hit for hit in hits)
+
+    def test_a_documentation_repository_line_is_not_flagged(self):
+        text = "Repository: https://github.com/example/project\n"
+        assert RULE_PACKAGE_REGISTRY.match(text) == []
+
     def test_an_install_index_on_testpypi_is_flagged(self):
         text = "pip install --index-url https://test.pypi.org/simple/ requests\n"
         hits = RULE_PACKAGE_REGISTRY.match(text)

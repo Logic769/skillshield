@@ -459,14 +459,15 @@ RULE_SUSPICIOUS_URLS = Rule(
 # Hosts of the official package registries. An install that points anywhere
 # else is a supply-chain attack (dependency confusion / registry hijack).
 # TestPyPI is not listed: it is a separate index that anyone can upload to,
-# so an install pointed there is an override like any other.
+# so an install pointed there is an override like any other. GitHub Packages
+# (npm.pkg.github.com) is not listed either: it is a separate registry that
+# needs its own namespace and authentication for a later install.
 _OFFICIAL_REGISTRY_HOSTS = {
     "pypi.org",
     "files.pythonhosted.org",
     "pypi.python.org",
     "registry.npmjs.org",
     "registry.yarnpkg.com",
-    "npm.pkg.github.com",
 }
 
 # Official-looking hosts that hold a separate index, so an install pointed
@@ -552,11 +553,18 @@ def _check_untrusted_registry(text: str) -> list[str]:
             hits.append(snippet)
 
     ini_pattern = (
-        r"(?im)^[ \t]*(?:(?:@[^ \t:]+:)?registry|index[-_]url|extra[-_]index[-_]url|npmRegistryServer"
-        r"|repository)"
+        r"(?im)^[ \t]*(?:(?:@[^ \t:]+:)?registry|index[-_]url|extra[-_]index[-_]url|npmRegistryServer)"
         r"[ \t]*[:=][ \t]*['\"]?(https?://[^\s'\"`]+)"
     )
     for match in re.finditer(ini_pattern, text):
+        if not _is_official_registry(match.group(1)):
+            hits.append(match.group(0).strip())
+
+    # .pypirc sets its upload target as "repository = ...". Only the assignment
+    # form is a registry override, so a documentation line such as
+    # "Repository: https://github.com/example/project" does not match.
+    pypirc_pattern = r"(?im)^[ \t]*repository[ \t]*=[ \t]*['\"]?(https?://[^\s'\"`]+)"
+    for match in re.finditer(pypirc_pattern, text):
         if not _is_official_registry(match.group(1)):
             hits.append(match.group(0).strip())
 
